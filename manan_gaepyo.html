@@ -462,8 +462,10 @@ function copySummary(){
   doCopy(txt);
 }
 function doCopy(t){
-  if(navigator.share){ navigator.share({text:t}).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); }); }
-  else fallback(t);
+  var data={title:"개표 현황", text:t};
+  if(navigator.share && (!navigator.canShare || navigator.canShare(data))){
+    navigator.share(data).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); });
+  } else fallback(t);
 }
 function fallback(t){
   const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
