@@ -427,11 +427,18 @@ function copyRow(kind,d,i){
   const p=getRef(kind,d,i); const h=num(p.h),y=num(p.y),x=num(p.x),w=num(p.w),g=h-y,t=h+y;
   if(t===0&&x===0&&w===0){toast("입력값이 없습니다");return;}
   const name=kind==='ed'?(d+" "+p.n):p.n;
+  const pH=t?(h/t*100).toFixed(1):'0.0', pY=t?(y/t*100).toFixed(1):'0.0';
   const lead=g>0?`격차 최대호 +${fmt(g)}`:(g<0?`격차 김대영 +${fmt(-g)}`:'동률');
-  const pH=t?(h/t*100).toFixed(1):'0.0';
   const wt=w>0?` · 재검대기 ${fmt(w)}`:'';
-  const tag=(p.r||w>0)?' ⚠재검중(잠정)':'';
-  const txt=`[${name}] 🔵최대호 ${fmt(h)} · 🔴김대영 ${fmt(y)} · 무효 ${fmt(x)}${wt} · ${lead} (최대호 ${pH}%)${tag}\n🕐 보낸시각 ${nowStamp()}`;
+  const tag=(p.r||w>0)?'\n⚠ 재검중 (수치 잠정)':'';
+  const txt=
+`📊 안양시장 개표 · ${name}
+━━━━━━━━━━
+🔵 최대호 ${fmt(h)}표 (${pH}%)
+🔴 김대영 ${fmt(y)}표 (${pY}%)
+👉 ${lead}
+무효 ${fmt(x)}표${wt}${tag}
+🕐 보낸시각 ${nowStamp()}`;
   doCopy(txt);
 }
 function copySummary(){
