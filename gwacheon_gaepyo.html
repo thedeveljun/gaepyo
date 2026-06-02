@@ -342,19 +342,16 @@ function copyRow(kind,d,i){
   const p=getRef(kind,d,i); const x=num(p.x),w=num(p.w);
   const T=num(p.a)+num(p.b)+num(p.c);
   if(T===0&&x===0&&w===0){toast("입력값이 없습니다");return;}
-  const name=kind==='ed'?(d+" "+p.n):p.n;
-  const lines=CANDS.map(cd=>{const v=num(p[cd.k]); const pc=T?(v/T*100).toFixed(1):'0.0'; return `${cd.dot} ${cd.name} ${fmt(v)}표 (${pc}%)`;});
-  const sorted=CANDS.map(cd=>({name:cd.name,v:num(p[cd.k])})).sort((m,n)=>n.v-m.v);
-  const lead=T?`1위 ${sorted[0].name}`:'';
+  const name=kind==='ed'?(d+" "+p.n+"표소"):p.n;
+  const lines=CANDS.map(cd=>{const v=num(p[cd.k]); const pc=T?(v/T*100).toFixed(1):'0.0'; return `${cd.dot}${cd.name} ${fmt(v)}\n(${pc}%)`;});
   const wt=w>0?` · 재검대기 ${fmt(w)}`:'';
   const tag=(p.r||w>0)?'\n⚠ 재검중 (수치 잠정)':'';
   const txt=
-`📊 과천시장 개표 · ${name}
-━━━━━━━━━━
+`개표 현황
+[${name}]
 ${lines.join('\n')}
-👉 ${lead}
-무효 ${fmt(x)}표${wt}${tag}
-🕐 보낸시각 ${nowStamp()}`;
+무효 ${fmt(x)}${wt}${tag}
+보낸시간 ${nowStamp()}`;
   doCopy(txt);
 }
 function copySummary(){
@@ -381,7 +378,7 @@ ${lines.join('\n')}
   doCopy(txt);
 }
 function doCopy(t){
-  var data={title:"개표 현황", text:t};
+  var data={text:t};
   if(navigator.share && (!navigator.canShare || navigator.canShare(data))){
     navigator.share(data).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); });
   } else fallback(t);
