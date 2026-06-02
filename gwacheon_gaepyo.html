@@ -374,8 +374,10 @@ ${lines.join('\n')}
   doCopy(txt);
 }
 function doCopy(t){
-  if(navigator.share){ navigator.share({text:t}).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); }); }
-  else fallback(t);
+  var data={title:"개표 현황", text:t};
+  if(navigator.share && (!navigator.canShare || navigator.canShare(data))){
+    navigator.share(data).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); });
+  } else fallback(t);
 }
 function fallback(t){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');toast("복사됨");}catch(e){toast("복사 실패");} document.body.removeChild(ta); }
 let tt; function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),1800);}
