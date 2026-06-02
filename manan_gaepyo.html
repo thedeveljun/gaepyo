@@ -38,12 +38,12 @@ body{padding-bottom:90px}
 .gapline{display:flex;justify-content:space-between;align-items:center;margin-top:9px;
   padding-top:9px;border-top:1px solid #222932;font-size:13px}
 .gapline .gap{font-weight:800;font-size:16px}
-.gapline .prog{color:#9aa4b2;font-size:12px}
-.subline{margin-top:6px;font-size:11px;color:#9aa4b2;text-align:right}
+.gapline .prog{color:#9aa4b2;font-size:13px}
+.subline{margin-top:6px;font-size:12px;color:#9aa4b2;text-align:right}
 .lead-dem{color:#6ea8ff} .lead-ppp{color:#ff8a98} .lead-tie{color:#cbd5e1}
 
 /* ── 도구 바 ── */
-.toolbar{display:flex;gap:7px;padding:10px 12px;align-items:center}
+.toolbar{display:flex;gap:7px;padding:8px 12px 4px;align-items:center}
 .toolbar .save{font-size:13px;color:#000;margin-right:auto}
 .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);
   font-family:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
@@ -62,7 +62,7 @@ body{padding-bottom:90px}
 
 /* ── 섹션 ── */
 .sec-h{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;
-  padding:14px 14px 6px;display:flex;align-items:center;gap:6px}
+  padding:2px 14px 5px;display:flex;align-items:center;gap:6px}
 .sec-h .tag{font-size:10px;background:#0d1117;color:#fff;padding:2px 7px;border-radius:20px;font-weight:700}
 
 /* ── 가로 스크롤 영역 ── */
@@ -78,7 +78,7 @@ body{padding-bottom:90px}
 .grp-h .cv{font-size:11px;color:var(--muted);transition:transform .2s}
 .grp.collapsed .cv{transform:rotate(-90deg)}
 .grp-h .name{font-weight:800;font-size:15px}
-.grp-h .sub{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.grp-h .sub{margin-left:auto;font-size:13px;color:#000;font-variant-numeric:tabular-nums;text-align:right}
 .grp-h .sub b{color:var(--dem)} .grp-h .sub i{color:var(--ppp);font-style:normal}
 .grp-body{border-top:1px solid var(--line)}
 .grp.collapsed .grp-body{display:none}
@@ -108,14 +108,13 @@ body{padding-bottom:90px}
 .rck{flex:none;border:1px solid #e7e9ec;background:#f3f4f6;width:46px;height:34px;border-radius:8px;
   font-size:12px;font-weight:800;color:#374151;cursor:pointer;line-height:1}
 .rck.on{background:#e8890c;border-color:#e8890c;color:#fff}
-.cpy{flex:none;border:none;background:#eef0f3;width:40px;height:34px;border-radius:8px;
-  font-size:16px;cursor:pointer}
+.cpy{flex:none;border:none;background:#e3f2f7;color:#0a7ea4;width:40px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .cpy:active{background:#dde0e4}
 
 /* ── 전송 버튼 ── */
 .float{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;
   width:calc(100% - 24px);max-width:536px;display:flex;gap:8px}
-.float .fb{flex:1;border:none;border-radius:13px;padding:15px;font-family:inherit;
+.float .fb{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;padding:15px;font-family:inherit;
   font-size:15px;font-weight:800;color:#fff;background:#0d1117;cursor:pointer;
   box-shadow:0 6px 18px rgba(0,0,0,.22)}
 .float .fb:active{transform:translateY(1px)}
@@ -194,7 +193,7 @@ body{padding-bottom:90px}
 </div>
 
 <div class="float">
-  <button class="fb" onclick="copySummary()">📋 캠프 전송용 현황 복사</button>
+  <button class="fb" onclick="copySummary()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>캠프 전송용 현황 보내기</button>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -245,7 +244,9 @@ function save(){
 }
 const num = v => { const n=parseInt(String(v).replace(/[^0-9]/g,''),10); return isNaN(n)?0:n; };
 const fmt = n => n.toLocaleString('ko-KR');
+const SHAREICON='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
 function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');}
+function nowStamp(){const d=new Date();const w=['일','월','화','수','목','금','토'];return (d.getMonth()+1)+"/"+d.getDate()+"("+w[d.getDay()]+") "+nowHM();}
 
 function allRows(){
   const r=[];
@@ -320,7 +321,7 @@ function rowHTML(kind,d,i,p){
     <span class="cellw"><input class="inp w" inputmode="numeric" placeholder="대기" value="${p.w}"
       oninput="setV('${kind}','${d}',${i},'w',this.value)"></span>
     <button class="rck ${p.r?'on':''}" onclick="toggleRck('${kind}','${d}',${i})">재검</button>
-    <button class="cpy" onclick="copyRow('${kind}','${d}',${i})">📋</button>
+    <button class="cpy" onclick="copyRow('${kind}','${d}',${i})">${SHAREICON}</button>
   </div>`;
 }
 
@@ -430,7 +431,7 @@ function copyRow(kind,d,i){
   const pH=t?(h/t*100).toFixed(1):'0.0';
   const wt=w>0?` · 재검대기 ${fmt(w)}`:'';
   const tag=(p.r||w>0)?' ⚠재검중(잠정)':'';
-  const txt=`[${name}] 🔵최대호 ${fmt(h)} · 🔴김대영 ${fmt(y)} · 무효 ${fmt(x)}${wt} · ${lead} (최대호 ${pH}%)${tag}`;
+  const txt=`[${name}] 🔵최대호 ${fmt(h)} · 🔴김대영 ${fmt(y)} · 무효 ${fmt(x)}${wt} · ${lead} (최대호 ${pH}%)${tag}\n🕐 보낸시각 ${nowStamp()}`;
   doCopy(txt);
 }
 function copySummary(){
@@ -456,13 +457,13 @@ function copySummary(){
 무효 ${fmt(X)}표 (${ir}%) · 집계 ${fmt(ballots)}표${rckLine}
 ━━━━━━━━━━
 · 선거일 ${fmt(edH)}:${fmt(edY)} (무${fmt(edX)})
-· 사전·거소 ${fmt(spH)}:${fmt(spY)} (무${fmt(spX)})`;
+· 사전·거소 ${fmt(spH)}:${fmt(spY)} (무${fmt(spX)})
+🕐 보낸시각 ${nowStamp()}`;
   doCopy(txt);
 }
 function doCopy(t){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(()=>toast("복사됨 · 캠프에 붙여넣기")).catch(()=>fallback(t));
-  } else fallback(t);
+  if(navigator.share){ navigator.share({text:t}).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); }); }
+  else fallback(t);
 }
 function fallback(t){
   const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
