@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>안양시장 개표집계 · 동안구</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+:root{
+  --dem:#0a3d91; --dem-soft:#e7eefb;
+  --ppp:#d6122a; --ppp-soft:#fbe8eb;
+  --ink:#15181d; --muted:#6b7280; --line:#e5e7eb;
+  --bg:#f4f5f7; --card:#ffffff;
+  --done:#0f9d58;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:"Pretendard",system-ui,sans-serif;
+  font-feature-settings:"tnum" 1;-webkit-text-size-adjust:100%}
+body{padding-bottom:90px}
+.wrap{max-width:560px;margin:0 auto}
+
+/* ── 상단 누적 현황 ── */
+.summary{position:sticky;top:0;z-index:50;background:#0d1117;color:#fff;
+  padding:12px 14px 13px;border-bottom:3px solid #000}
+.summary .ttl{font-size:13px;letter-spacing:.04em;color:#9aa4b2;display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px}
+.summary .ttl b{color:#fff;font-weight:700;font-size:13px}
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar{display:flex;align-items:center;gap:9px}
+.bar .dot{width:11px;height:11px;border-radius:50%;flex:none}
+.bar .nm{font-size:14px;font-weight:700;width:60px;flex:none}
+.bar .track{flex:1;height:20px;background:#222932;border-radius:5px;overflow:hidden;position:relative}
+.bar .fill{height:100%;border-radius:5px;transition:width .35s ease}
+.bar .pct{position:absolute;right:7px;top:50%;transform:translateY(-50%);
+  font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.bar .vot{font-size:14px;font-weight:800;width:74px;text-align:right;flex:none;font-variant-numeric:tabular-nums}
+.gapline{display:flex;justify-content:space-between;align-items:center;margin-top:9px;
+  padding-top:9px;border-top:1px solid #222932;font-size:13px}
+.gapline .gap{font-weight:800;font-size:16px}
+.gapline .prog{color:#9aa4b2;font-size:13px}
+.subline{margin-top:6px;font-size:12px;color:#9aa4b2;text-align:right}
+.lead-dem{color:#6ea8ff} .lead-ppp{color:#ff8a98} .lead-tie{color:#cbd5e1}
+
+/* ── 도구 바 ── */
+.toolbar{display:flex;gap:7px;padding:8px 12px 4px;align-items:center}
+.toolbar .save{font-size:13px;color:#000;margin-right:auto}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:13px;font-weight:600;padding:8px 12px;border-radius:9px;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn.prime{background:#0d1117;color:#fff;border-color:#0d1117}
+
+/* ── 설정 패널 ── */
+.panel{margin:0 12px 10px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:12px 13px;display:none}
+.panel.open{display:block}
+.panel h4{font-size:13px;margin-bottom:8px}
+.panel .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.panel input[type=number]{width:64px;padding:7px;border:1px solid var(--line);
+  border-radius:8px;font-family:inherit;font-size:14px;text-align:center}
+.panel .danger{color:var(--ppp);border-color:var(--ppp-soft);background:var(--ppp-soft)}
+
+/* ── 섹션 ── */
+.sec-h{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.03em;
+  padding:2px 14px 5px;display:flex;align-items:center;gap:6px}
+.sec-h .tag{font-size:10px;background:#0d1117;color:#fff;padding:2px 7px;border-radius:20px;font-weight:700}
+
+/* ── 가로 스크롤 영역 ── */
+.scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;position:relative}
+.scroll-inner{width:-webkit-max-content;width:max-content;min-width:100%;padding:0 12px}
+.scrollhint{font-size:12px;color:#000;padding:2px 14px 6px;display:flex;align-items:center;gap:5px}
+.scrollhint b{color:#e8890c}
+
+/* ── 동 그룹 ── */
+.grp{background:var(--card);margin:0 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  width:-webkit-max-content;width:max-content;min-width:100%}
+.grp-h{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;user-select:none}
+.grp-h .cv{font-size:11px;color:var(--muted);transition:transform .2s}
+.grp.collapsed .cv{transform:rotate(-90deg)}
+.grp-h .name{font-weight:800;font-size:15px}
+.grp-h .sub{margin-left:auto;font-size:13px;color:#000;font-variant-numeric:tabular-nums;text-align:right}
+.grp-h .sub b{color:var(--dem)} .grp-h .sub i{color:var(--ppp);font-style:normal}
+.grp-body{border-top:1px solid var(--line)}
+.grp.collapsed .grp-body{display:none}
+.grp-tools{display:flex;gap:6px;padding:8px 13px;border-top:1px dashed var(--line);background:#fafbfc}
+.mini{border:1px solid var(--line);background:#fff;border-radius:7px;width:34px;height:34px;
+  font-size:18px;font-weight:800;cursor:pointer;color:var(--muted)}
+.grp-tools span{font-size:14px;font-weight:700;color:#374151;align-self:center}
+
+/* ── 투표소 행 ── */
+.row-p{display:flex;align-items:center;gap:4px;padding:3px 6px;border-top:1px solid #f1f2f4}
+.row-p:first-child{border-top:none}
+.row-p .pn{font-size:12px;font-weight:600;width:38px;flex:none;color:#374151}
+.row-p.filled{background:#f7fbf8}
+.row-p.filled .pn::after{content:"●";color:var(--done);font-size:8px;margin-left:3px;vertical-align:middle}
+.row-p.recheck{background:#fff6e9;box-shadow:inset 3px 0 0 #e8890c}
+.inp{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:7px 6px;
+  font-family:inherit;font-size:16px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.inp.d{border-color:#cdd9f0} .inp.d:focus{outline:none;border-color:var(--dem);background:var(--dem-soft)}
+.inp.p{border-color:#f0cdd3} .inp.p:focus{outline:none;border-color:var(--ppp);background:var(--ppp-soft)}
+.inp.x{border-color:#e3e5e8;color:#6b7280;font-weight:600;padding:3px 4px} .inp.x:focus{outline:none;border-color:#9ca3af;background:#f3f4f6}
+.inp.w{border-color:#f4ddb8;color:#b06a08;font-weight:600;background:#fffaf2;padding:3px 4px} .inp.w:focus{outline:none;border-color:#e8890c;background:#fff4e2}
+.cell{width:76px;flex:none;min-width:0}
+.cellx{width:42px;flex:none}
+.cellw{width:42px;flex:none}
+.gp{width:38px;flex:none;text-align:center;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.gp.d{color:var(--dem)} .gp.p{color:var(--ppp)} .gp.z{color:#9ca3af}
+.rck{flex:none;border:1px solid #e7e9ec;background:#f3f4f6;width:46px;height:34px;border-radius:8px;
+  font-size:12px;font-weight:800;color:#374151;cursor:pointer;line-height:1}
+.rck.on{background:#e8890c;border-color:#e8890c;color:#fff}
+.cpy{flex:none;border:none;background:#e3f2f7;color:#0a7ea4;width:40px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cpy:active{background:#dde0e4}
+
+/* ── 전송 버튼 ── */
+.float{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;
+  width:calc(100% - 24px);max-width:536px;display:flex;gap:8px}
+.float .fb{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;padding:15px;font-family:inherit;
+  font-size:15px;font-weight:800;color:#fff;background:#0d1117;cursor:pointer;
+  box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.float .fb:active{transform:translateY(1px)}
+
+.toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
+  background:#0d1117;color:#fff;padding:11px 18px;border-radius:24px;font-size:13px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.25s;z-index:100}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hd{padding:14px 14px 2px}
+.hd .t{font-size:18px;font-weight:900;letter-spacing:-.01em}
+.hd .s{font-size:13px;color:#000;font-weight:700;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hd">
+    <div class="t">안양시장 개표집계</div>
+    <div class="s">제9회 지방선거 · 동안구 개표참관</div>
+  </div>
+
+  <!-- 누적 현황 -->
+  <div class="summary">
+    <div class="ttl"><span>📊 확정 누적 현황</span><b id="clock">--:--</b></div>
+    <div class="bars">
+      <div class="bar">
+        <span class="dot" style="background:var(--dem)"></span>
+        <span class="nm">최대호</span>
+        <span class="track"><span class="fill" id="fillD" style="background:var(--dem);width:0%"></span><span class="pct" id="pctD">0%</span></span>
+        <span class="vot" id="votD">0</span>
+      </div>
+      <div class="bar">
+        <span class="dot" style="background:var(--ppp)"></span>
+        <span class="nm">김대영</span>
+        <span class="track"><span class="fill" id="fillP" style="background:var(--ppp);width:0%"></span><span class="pct" id="pctP">0%</span></span>
+        <span class="vot" id="votP">0</span>
+      </div>
+    </div>
+    <div class="gapline">
+      <span class="gap" id="gap">격차 —</span>
+      <span class="prog" id="prog">공표 0 / 0곳</span>
+    </div>
+    <div class="subline" id="subline">무효 0표 · 집계 0표</div>
+    <div class="subline" id="rckline" style="display:none;color:#f0a93c"></div>
+  </div>
+
+  <!-- 도구 -->
+  <div class="toolbar">
+    <span class="save" id="saveState">저장됨</span>
+    <button class="btn" onclick="togglePanel()">⚙ 설정</button>
+    <button class="btn prime" onclick="copySummary()">현황 복사</button>
+  </div>
+
+  <!-- 설정 -->
+  <div class="panel" id="panel">
+    <h4>동별 투표소 개수 일괄 설정</h4>
+    <div class="row">
+      <span>각 동에 투표소</span>
+      <input type="number" id="bulkN" min="1" max="20" value="3">
+      <span>개씩</span>
+      <button class="btn" onclick="bulkApply()">적용</button>
+    </div>
+    <div class="row" style="margin-top:6px">※ 공식 투표구 명부에 맞춰 각 동 머리줄의 +/− 로 미세조정하세요.</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn danger" onclick="resetAll()">전체 입력값 초기화</button>
+    </div>
+  </div>
+
+  <div class="scroller">
+    <div class="scroll-inner">
+      <div id="secA"></div>
+      <div id="secB"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="float">
+  <button class="fb" onclick="copySummary()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>캠프 전송용 현황 보내기</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DONGS = ["비산1동","비산2동","비산3동","부흥동","달안동","관양동","인덕원동","부림동","평촌동","평안동","귀인동","호계1동","호계2동","호계3동","범계동","신촌동","갈산동"];
+const SPGROUPS = [
+  {key:"gn", label:"관내사전투표", short:"관내사전", addable:true},
+  {key:"gw", label:"관외사전투표", short:"관외사전", addable:true},
+  {key:"gs", label:"거소·선상투표", short:"거소·선상", addable:false}
+];
+const KEY = "dongan_gaepyo_v1";
+
+let state = load();
+
+function mkRow(n){return {n,h:"",y:"",x:"",w:"",r:false};}
+function blankEd(n){const o={}; DONGS.forEach(d=>{o[d]=Array.from({length:n},(_,i)=>({n:"제"+(i+1)+"투",h:"",y:"",x:"",w:"",r:false}))}); return o;}
+function blankSp(){return {gn:[mkRow("관내사전투표")], gw:[mkRow("관외사전투표")], gs:[mkRow("거소·선상투표")]};}
+function spGroup(key){return SPGROUPS.find(g=>g.key===key);}
+function renameSp(key){
+  const arr=state.sp[key], g=spGroup(key);
+  if(arr.length===1){ arr[0].n=g.label; }
+  else arr.forEach((p,i)=>p.n=g.short+" "+(i+1));
+}
+function norm(s){
+  DONGS.forEach(d=>{ if(!s.ed[d]) s.ed[d]=blankEd(1)[d]; s.ed[d].forEach(p=>{if(p.x===undefined)p.x="";if(p.w===undefined)p.w="";if(p.r===undefined)p.r=false;}); });
+  // 사전·거소: 옛 배열 형식 → 그룹 형식으로 변환
+  if(Array.isArray(s.sp)){
+    const ns=blankSp();
+    s.sp.forEach(p=>{
+      const tgt = (p.n&&p.n.indexOf("관내")>=0)?ns.gn[0] : (p.n&&p.n.indexOf("관외")>=0)?ns.gw[0] : ns.gs[0];
+      tgt.h=p.h||"";tgt.y=p.y||"";tgt.x=p.x||"";tgt.w=p.w||"";tgt.r=!!p.r;
+    });
+    s.sp=ns;
+  } else {
+    ["gn","gw","gs"].forEach(k=>{ if(!s.sp[k]||!s.sp[k].length) s.sp[k]=blankSp()[k];
+      s.sp[k].forEach(p=>{if(p.x===undefined)p.x="";if(p.w===undefined)p.w="";if(p.r===undefined)p.r=false;}); });
+  }
+  return s;
+}
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(KEY)); if(s&&s.ed&&s.sp) return norm(s);}catch(e){}
+  return {ed:blankEd(3), sp:blankSp()};
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));
+    const el=document.getElementById('saveState'); el.textContent="✓ 저장됨 "+nowHM(); }
+  catch(e){document.getElementById('saveState').textContent="⚠ 저장불가";}
+}
+const num = v => { const n=parseInt(String(v).replace(/[^0-9]/g,''),10); return isNaN(n)?0:n; };
+const fmt = n => n.toLocaleString('ko-KR');
+const SHAREICON='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');}
+function nowStamp(){const d=new Date();const w=['일','월','화','수','목','금','토'];return (d.getMonth()+1)+"/"+d.getDate()+"("+w[d.getDay()]+") "+nowHM();}
+
+function allRows(){
+  const r=[];
+  DONGS.forEach(d=>state.ed[d].forEach((p,i)=>r.push({...p,dong:d,full:d+" "+p.n,ref:state.ed[d][i]})));
+  SPGROUPS.forEach(g=>state.sp[g.key].forEach((p,i)=>r.push({...p,dong:"",full:p.n,ref:state.sp[g.key][i]})));
+  return r;
+}
+
+function render(){
+  // 선거일 섹션
+  let a=`<div class="sec-h"><span class="tag">A</span> 선거일 투표소 · 동별</div>`;
+  DONGS.forEach(d=>{
+    const arr=state.ed[d];
+    let sh=0,sy=0,sx=0,sw=0,filled=0;
+    arr.forEach(p=>{sh+=num(p.h);sy+=num(p.y);sx+=num(p.x);sw+=num(p.w);if(p.h!==""||p.y!==""||p.x!=="")filled++;});
+    const sg=sh-sy, sgt=(sh+sy)===0?'':(sg>0?` (+${fmt(sg)})`:(sg<0?` (−${fmt(-sg)})`:' (0)'));
+    a+=`<div class="grp ${arr._c?'collapsed':''}" data-d="${d}">
+      <div class="grp-h" onclick="toggleGrp('${d}')">
+        <span class="cv">▼</span><span class="name">${d}</span>
+        <span class="sub"><b>${fmt(sh)}</b>:<i>${fmt(sy)}</i>${sgt}<br>무${fmt(sx)} · 대기${fmt(sw)} · ${filled}/${arr.length}곳</span>
+      </div>
+      <div class="grp-body">`;
+    arr.forEach((p,i)=>{ a+=rowHTML('ed',d,i,p); });
+    a+=`<div class="grp-tools">
+        <button class="mini" onclick="rmP('${d}')">−</button>
+        <button class="mini" onclick="addP('${d}')">+</button>
+        <span>투표소 ${arr.length}개</span>
+      </div></div></div>`;
+  });
+  document.getElementById('secA').innerHTML=a;
+
+  // 사전·거소 섹션
+  let b=`<div class="sec-h"><span class="tag">B</span> 사전 · 거소투표 · 동 구분 없음</div>`;
+  SPGROUPS.forEach(g=>{
+    const arr=state.sp[g.key];
+    let sh=0,sy=0,sx=0,sw=0,filled=0;
+    arr.forEach(p=>{sh+=num(p.h);sy+=num(p.y);sx+=num(p.x);sw+=num(p.w);if(p.h!==""||p.y!==""||p.x!=="")filled++;});
+    const sg=sh-sy, sgt=(sh+sy)===0?'':(sg>0?` (+${fmt(sg)})`:(sg<0?` (−${fmt(-sg)})`:' (0)'));
+    b+=`<div class="grp" data-sp="${g.key}">
+      <div class="grp-h" style="cursor:default">
+        <span class="name">${g.label}</span>
+        <span class="sub"><b>${fmt(sh)}</b>:<i>${fmt(sy)}</i>${sgt}<br>무${fmt(sx)} · 대기${fmt(sw)} · ${filled}/${arr.length}묶음</span>
+      </div>
+      <div class="grp-body">`;
+    arr.forEach((p,i)=>{ b+=rowHTML('sp',g.key,i,p); });
+    if(g.addable){
+      b+=`<div class="grp-tools">
+        <button class="mini" onclick="rmSp('${g.key}')">−</button>
+        <button class="mini" onclick="addSp('${g.key}')">+</button>
+        <span>${g.label} ${arr.length}묶음</span>
+      </div>`;
+    }
+    b+=`</div></div>`;
+  });
+  b+=`<div style="height:8px"></div>`;
+  document.getElementById('secB').innerHTML=b;
+
+  recompute();
+}
+
+function rowHTML(kind,d,i,p){
+  const filled=(p.h!==""||p.y!==""||p.x!=="");
+  const inRck=(p.r||num(p.w)>0);
+  return `<div class="row-p ${filled?'filled':''} ${inRck?'recheck':''}">
+    <span class="pn">${p.n}</span>
+    <span class="cell"><input class="inp d" inputmode="numeric" placeholder="최대호" value="${p.h}"
+      oninput="setV('${kind}','${d}',${i},'h',this.value)"></span>
+    <span class="cell"><input class="inp p" inputmode="numeric" placeholder="김대영" value="${p.y}"
+      oninput="setV('${kind}','${d}',${i},'y',this.value)"></span>
+    <span class="cellx"><input class="inp x" inputmode="numeric" placeholder="무효" value="${p.x}"
+      oninput="setV('${kind}','${d}',${i},'x',this.value)"></span>
+    <span class="cellw"><input class="inp w" inputmode="numeric" placeholder="대기" value="${p.w}"
+      oninput="setV('${kind}','${d}',${i},'w',this.value)"></span>
+    <button class="rck ${p.r?'on':''}" onclick="toggleRck('${kind}','${d}',${i})">재검</button>
+    <button class="cpy" onclick="copyRow('${kind}','${d}',${i})">${SHAREICON}</button>
+  </div>`;
+}
+
+function getRef(kind,d,i){ return kind==='ed'? state.ed[d][i] : state.sp[d][i]; }
+
+function addSp(key){ const a=state.sp[key]; a.push(mkRow("")); renameSp(key); render(); save(); }
+function rmSp(key){ const a=state.sp[key]; if(a.length<=1)return; if(rmGuard(a))return; a.pop(); renameSp(key); render(); save(); }
+
+function toggleRck(kind,d,i){
+  const ref=getRef(kind,d,i); ref.r=!ref.r;
+  render(); save();
+}
+
+function setV(kind,d,i,f,val){
+  const ref=getRef(kind,d,i);
+  ref[f]=val.replace(/[^0-9]/g,'');
+  // 행/소계/누적만 갱신 (포커스 유지 위해 전체 재렌더 X)
+  updateSubtotals(); recompute(); save();
+}
+
+function updateSubtotals(){
+  DONGS.forEach(d=>{
+    const arr=state.ed[d]; let sh=0,sy=0,sx=0,sw=0,filled=0;
+    arr.forEach(p=>{sh+=num(p.h);sy+=num(p.y);sx+=num(p.x);sw+=num(p.w);if(p.h!==""||p.y!==""||p.x!=="")filled++;});
+    const sg=sh-sy, sgt=(sh+sy)===0?'':(sg>0?` (+${fmt(sg)})`:(sg<0?` (−${fmt(-sg)})`:' (0)'));
+    const grp=document.querySelector(`.grp[data-d="${d}"] .sub`);
+    if(grp) grp.innerHTML=`<b>${fmt(sh)}</b>:<i>${fmt(sy)}</i>${sgt}<br>무${fmt(sx)} · 대기${fmt(sw)} · ${filled}/${arr.length}곳`;
+  });
+  SPGROUPS.forEach(g=>{
+    const arr=state.sp[g.key]; let sh=0,sy=0,sx=0,sw=0,filled=0;
+    arr.forEach(p=>{sh+=num(p.h);sy+=num(p.y);sx+=num(p.x);sw+=num(p.w);if(p.h!==""||p.y!==""||p.x!=="")filled++;});
+    const sg=sh-sy, sgt=(sh+sy)===0?'':(sg>0?` (+${fmt(sg)})`:(sg<0?` (−${fmt(-sg)})`:' (0)'));
+    const grp=document.querySelector(`.grp[data-sp="${g.key}"] .sub`);
+    if(grp) grp.innerHTML=`<b>${fmt(sh)}</b>:<i>${fmt(sy)}</i>${sgt}<br>무${fmt(sx)} · 대기${fmt(sw)} · ${filled}/${arr.length}묶음`;
+  });
+  render._light && render._light();
+}
+
+function recompute(){
+  let H=0,Y=0,X=0,W=0,done=0,total=0,rck=0;
+  allRows().forEach(r=>{
+    total++;
+    W+=num(r.w);
+    if(r.r||num(r.w)>0)rck++;
+    if(r.h!==""||r.y!==""||r.x!==""){done++; H+=num(r.h); Y+=num(r.y); X+=num(r.x);}
+  });
+  const T=H+Y;
+  const pH=T? H/T*100:0, pY=T? Y/T*100:0;
+  document.getElementById('votD').textContent=fmt(H);
+  document.getElementById('votP').textContent=fmt(Y);
+  document.getElementById('pctD').textContent=pH.toFixed(1)+'%';
+  document.getElementById('pctP').textContent=pY.toFixed(1)+'%';
+  document.getElementById('fillD').style.width=pH+'%';
+  document.getElementById('fillP').style.width=pY+'%';
+  document.getElementById('prog').textContent=`공표 ${done} / ${total}곳`;
+  const g=H-Y, ge=document.getElementById('gap');
+  if(T===0){ge.textContent='격차 —';ge.className='gap lead-tie';}
+  else if(g>0){ge.textContent='최대호 +'+fmt(g);ge.className='gap lead-dem';}
+  else if(g<0){ge.textContent='김대영 +'+fmt(-g);ge.className='gap lead-ppp';}
+  else{ge.textContent='동률 0';ge.className='gap lead-tie';}
+  document.getElementById('clock').textContent=nowHM();
+  const ballots=H+Y+X, ir=ballots?(X/ballots*100):0;
+  document.getElementById('subline').textContent=`무효 ${fmt(X)}표 (${ir.toFixed(1)}%) · 집계 ${fmt(ballots)}표`;
+  const rl=document.getElementById('rckline');
+  if(rck>0||W>0){rl.style.display='block';rl.textContent=`⚠ 재검 ${rck}곳 · 재검대기 ${fmt(W)}장 (수치 잠정)`;}
+  else{rl.style.display='none';}
+}
+
+/* 행 입력 시 가벼운 갱신: 격차/배경만 다시 그림 */
+render._light = function(){
+  const rows=allRows(); const els=document.querySelectorAll('.row-p');
+  els.forEach((el,idx)=>{
+    const r=rows[idx]; if(!r)return;
+    el.classList.toggle('filled',(r.h!==""||r.y!==""||r.x!==""));
+    el.classList.toggle('recheck',(r.r||num(r.w)>0));
+  });
+};
+
+function toggleGrp(d){ DONGS.forEach(x=>{}); d=d; const cur=state.ed[d]; cur._c=!cur._c; render(); }
+function addP(d){ const a=state.ed[d]; a.push({n:"제"+(a.length+1)+"투",h:"",y:"",x:"",w:"",r:false}); render(); save(); }
+function rmGuard(arr){ if(arr.some(function(p){return p.h!==""||p.y!==""||p.x!==""||p.w!=="";})){ toast("입력값이 있어 삭제할 수 없어요. 먼저 숫자를 모두 지워주세요"); return true; } return false; }
+function rmP(d){ const a=state.ed[d]; if(a.length<=1)return; if(rmGuard(a))return; a.pop(); render(); save(); }
+
+function bulkApply(){
+  const n=Math.max(1,Math.min(20,num(document.getElementById('bulkN').value)||3));
+  DONGS.forEach(d=>{
+    const old=state.ed[d]; const arr=[];
+    for(let i=0;i<n;i++){ arr.push(old[i]? {n:"제"+(i+1)+"투",h:old[i].h,y:old[i].y,x:old[i].x,w:old[i].w,r:old[i].r} : {n:"제"+(i+1)+"투",h:"",y:"",x:"",w:"",r:false}); }
+    arr._c=old._c; state.ed[d]=arr;
+  });
+  render(); save(); toast(`각 동 ${n}개 투표소로 설정됨`); togglePanel();
+}
+function resetAll(){
+  if(!confirm("모든 입력값을 지웁니다. 투표소 구성은 유지됩니다.\\n계속할까요?"))return;
+  DONGS.forEach(d=>state.ed[d].forEach(p=>{p.h="";p.y="";p.x="";p.w="";p.r=false;}));
+  SPGROUPS.forEach(g=>state.sp[g.key].forEach(p=>{p.h="";p.y="";p.x="";p.w="";p.r=false;}));
+  render(); save(); toast("초기화 완료");
+}
+function togglePanel(){ document.getElementById('panel').classList.toggle('open'); }
+
+/* ── 복사 ── */
+function copyRow(kind,d,i){
+  const p=getRef(kind,d,i); const h=num(p.h),y=num(p.y),x=num(p.x),w=num(p.w),t=h+y;
+  if(t===0&&x===0&&w===0){toast("입력값이 없습니다");return;}
+  const name=kind==='ed'?(d+" "+p.n+"표소"):p.n;
+  const pH=t?(h/t*100).toFixed(1):'0.0', pY=t?(y/t*100).toFixed(1):'0.0';
+  const wt=w>0?` · 재검대기 ${fmt(w)}`:'';
+  const tag=(p.r||w>0)?'\n⚠ 재검중 (수치 잠정)':'';
+  const txt=
+`개표 현황
+[${name}]
+🔵최대호 ${fmt(h)}
+(${pH}%)
+🔴김대영 ${fmt(y)}
+(${pY}%)
+무효 ${fmt(x)}${wt}${tag}
+보낸시간 ${nowStamp()}`;
+  doCopy(txt);
+}
+function copySummary(){
+  let H=0,Y=0,X=0,W=0,done=0,total=0,rck=0;
+  allRows().forEach(r=>{total++; W+=num(r.w); if(r.r||num(r.w)>0)rck++; if(r.h!==""||r.y!==""||r.x!==""){done++;H+=num(r.h);Y+=num(r.y);X+=num(r.x);}});
+  const T=H+Y;
+  if(T===0&&X===0&&W===0){toast("아직 입력된 값이 없습니다");return;}
+  const pH=T?(H/T*100).toFixed(1):'0.0',pY=T?(Y/T*100).toFixed(1):'0.0',g=H-Y;
+  const lead=g>0?`격차 최대호 +${fmt(g)}`:(g<0?`격차 김대영 +${fmt(-g)}`:'동률');
+  const ballots=H+Y+X, ir=ballots?(X/ballots*100).toFixed(1):'0.0';
+  // 섹션 소계
+  let edH=0,edY=0,edX=0,spH=0,spY=0,spX=0;
+  DONGS.forEach(d=>state.ed[d].forEach(p=>{edH+=num(p.h);edY+=num(p.y);edX+=num(p.x);}));
+  SPGROUPS.forEach(g=>state.sp[g.key].forEach(p=>{spH+=num(p.h);spY+=num(p.y);spX+=num(p.x);}));
+  const rckLine = (rck>0||W>0) ? `\n⚠ 재검 ${rck}곳 · 재검대기 ${fmt(W)}장 (수치 잠정)` : '';
+  const txt=
+`📊 안양시장(동안구) 개표현황 ${nowHM()}
+공표 ${done}/${total}곳
+━━━━━━━━━━
+🔵 최대호 ${fmt(H)}표 (${pH}%)
+🔴 김대영 ${fmt(Y)}표 (${pY}%)
+👉 ${lead}
+무효 ${fmt(X)}표 (${ir}%) · 집계 ${fmt(ballots)}표${rckLine}
+━━━━━━━━━━
+· 선거일 ${fmt(edH)}:${fmt(edY)} (무${fmt(edX)})
+· 사전·거소 ${fmt(spH)}:${fmt(spY)} (무${fmt(spX)})
+🕐 보낸시각 ${nowStamp()}`;
+  doCopy(txt);
+}
+function doCopy(t){
+  var data={text:t};
+  if(navigator.share && (!navigator.canShare || navigator.canShare(data))){
+    navigator.share(data).catch(function(e){ if(e&&e.name==="AbortError")return; fallback(t); });
+  } else fallback(t);
+}
+function fallback(t){
+  const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+  ta.select(); try{document.execCommand('copy');toast("복사됨");}catch(e){toast("복사 실패");}
+  document.body.removeChild(ta);
+}
+let tt;
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),1800);}
+
+render();
+setInterval(()=>document.getElementById('clock').textContent=nowHM(),30000);
+</script>
+</body>
+</html>
