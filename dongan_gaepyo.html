@@ -328,7 +328,7 @@ function rowHTML(kind,d,i,p){
 function getRef(kind,d,i){ return kind==='ed'? state.ed[d][i] : state.sp[d][i]; }
 
 function addSp(key){ const a=state.sp[key]; a.push(mkRow("")); renameSp(key); render(); save(); }
-function rmSp(key){ const a=state.sp[key]; if(a.length<=1)return; if(rmGuard(a))return; a.pop(); renameSp(key); render(); save(); }
+function rmSp(key){ const a=state.sp[key]; if(a.length<=1)return; if(rmGuard(a[a.length-1]))return; a.pop(); renameSp(key); render(); save(); }
 
 function toggleRck(kind,d,i){
   const ref=getRef(kind,d,i); ref.r=!ref.r;
@@ -402,8 +402,8 @@ render._light = function(){
 
 function toggleGrp(d){ DONGS.forEach(x=>{}); d=d; const cur=state.ed[d]; cur._c=!cur._c; render(); }
 function addP(d){ const a=state.ed[d]; a.push({n:"제"+(a.length+1)+"투",h:"",y:"",x:"",w:"",r:false}); render(); save(); }
-function rmGuard(arr){ if(arr.some(function(p){return p.h!==""||p.y!==""||p.x!==""||p.w!=="";})){ toast("입력값이 있어 삭제할 수 없어요. 먼저 숫자를 모두 지워주세요"); return true; } return false; }
-function rmP(d){ const a=state.ed[d]; if(a.length<=1)return; if(rmGuard(a))return; a.pop(); render(); save(); }
+function rmGuard(p){ if(p.h!==""||p.y!==""||p.x!==""||p.w!==""){ toast("이 투표소에 입력값이 있어 삭제할 수 없어요. 숫자를 먼저 지우세요"); return true; } return false; }
+function rmP(d){ const a=state.ed[d]; if(a.length<=1)return; if(rmGuard(a[a.length-1]))return; a.pop(); render(); save(); }
 
 function bulkApply(){
   const n=Math.max(1,Math.min(20,num(document.getElementById('bulkN').value)||3));
