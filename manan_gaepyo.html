@@ -114,9 +114,10 @@ body{padding-bottom:90px}
 /* ── 전송 버튼 ── */
 .float{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;
   width:calc(100% - 24px);max-width:536px;display:flex;gap:8px}
-.float .fb{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;padding:15px;font-family:inherit;
-  font-size:15px;font-weight:800;color:#fff;background:#0d1117;cursor:pointer;
+.float .fb{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:none;border-radius:13px;padding:13px 6px;font-family:inherit;
+  font-size:13px;font-weight:800;color:#fff;background:#0d1117;cursor:pointer;
   box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.float .fb2{background:#155e9c}
 .float .fb:active{transform:translateY(1px)}
 
 .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);
@@ -193,7 +194,8 @@ body{padding-bottom:90px}
 </div>
 
 <div class="float">
-  <button class="fb" onclick="copySummary()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>캠프 전송용 현황 보내기</button>
+  <button class="fb" onclick="copyAllStations()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>투표소별 현황 보내기</button>
+  <button class="fb fb2" onclick="copySummary()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>전체 현황 보내기</button>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -440,6 +442,18 @@ function copyRow(kind,d,i){
 무효 ${fmt(x)}${wt}${tag}
 보낸시간 ${nowStamp()}`;
   doCopy(txt);
+}
+function copyAllStations(){
+  let done=0,total=0,H=0,Y=0,body="";
+  function addRow(p,label){
+    total++; if(!(p.h!==""||p.y!==""||p.x!=="")) return;
+    done++; const h=num(p.h),y=num(p.y),x=num(p.x); H+=h;Y+=y;
+    body+="["+label+"] 🔵"+fmt(h)+" · 🔴"+fmt(y)+(x>0?" (무"+fmt(x)+")":"")+"\n";
+  }
+  DONGS.forEach(function(d){state.ed[d].forEach(function(p){addRow(p,d+" "+p.n+"표소");});});
+  SPGROUPS.forEach(function(g){state.sp[g.key].forEach(function(p){addRow(p,p.n);});});
+  if(done===0){toast("입력된 투표소가 없습니다");return;}
+  doCopy("📊 안양시장 투표소별 현황 "+nowHM()+"\n공표 "+done+"/"+total+"곳 · 🔵최대호 🔴김대영\n━━━━━━━━━━\n"+body.trim()+"\n━━━━━━━━━━\n누적 🔵"+fmt(H)+" · 🔴"+fmt(Y)+"\n보낸시간 "+nowStamp());
 }
 function copySummary(){
   let H=0,Y=0,X=0,W=0,done=0,total=0,rck=0;
