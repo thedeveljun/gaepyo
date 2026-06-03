@@ -72,7 +72,7 @@ body{padding-bottom:90px}
 .scrollhint b{color:#e8890c}
 
 /* ── 동 그룹 ── */
-.grp{background:var(--card);margin:0 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+.grp{background:var(--card);margin:0 0 5px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
   width:-webkit-max-content;width:max-content;min-width:100%}
 .grp-h{display:flex;align-items:center;gap:8px;padding:11px 13px;cursor:pointer;user-select:none}
 .grp-h .cv{font-size:11px;color:var(--muted);transition:transform .2s}
@@ -88,27 +88,27 @@ body{padding-bottom:90px}
 .grp-tools span{font-size:14px;font-weight:700;color:#374151;align-self:center}
 
 /* ── 투표소 행 ── */
-.row-p{display:flex;align-items:center;gap:4px;padding:3px 6px;border-top:1px solid #f1f2f4}
+.row-p{display:flex;align-items:center;gap:4px;padding:1px 6px;border-top:1px solid #f1f2f4}
 .row-p:first-child{border-top:none}
 .row-p .pn{font-size:12px;font-weight:600;width:38px;flex:none;color:#374151}
 .row-p.filled{background:#f7fbf8}
 .row-p.filled .pn::after{content:"●";color:var(--done);font-size:8px;margin-left:3px;vertical-align:middle}
 .row-p.recheck{background:#fff6e9;box-shadow:inset 3px 0 0 #e8890c}
-.inp{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:7px 6px;
+.inp{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:4px 6px;
   font-family:inherit;font-size:16px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .inp.d{border-color:#cdd9f0} .inp.d:focus{outline:none;border-color:var(--dem);background:var(--dem-soft)}
 .inp.p{border-color:#f0cdd3} .inp.p:focus{outline:none;border-color:var(--ppp);background:var(--ppp-soft)}
-.inp.x{border-color:#e3e5e8;color:#6b7280;font-weight:600;padding:3px 4px} .inp.x:focus{outline:none;border-color:#9ca3af;background:#f3f4f6}
-.inp.w{border-color:#f4ddb8;color:#b06a08;font-weight:600;background:#fffaf2;padding:3px 4px} .inp.w:focus{outline:none;border-color:#e8890c;background:#fff4e2}
+.inp.x{border-color:#e3e5e8;color:#6b7280;font-weight:600;padding:2px 4px} .inp.x:focus{outline:none;border-color:#9ca3af;background:#f3f4f6}
+.inp.w{border-color:#f4ddb8;color:#b06a08;font-weight:600;background:#fffaf2;padding:2px 4px} .inp.w:focus{outline:none;border-color:#e8890c;background:#fff4e2}
 .cell{width:76px;flex:none;min-width:0}
 .cellx{width:42px;flex:none}
 .cellw{width:42px;flex:none}
 .gp{width:38px;flex:none;text-align:center;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
 .gp.d{color:var(--dem)} .gp.p{color:var(--ppp)} .gp.z{color:#9ca3af}
-.rck{flex:none;border:1px solid #e7e9ec;background:#f3f4f6;width:46px;height:34px;border-radius:8px;
+.rck{flex:none;border:1px solid #e7e9ec;background:#f3f4f6;width:46px;height:30px;border-radius:8px;
   font-size:12px;font-weight:800;color:#374151;cursor:pointer;line-height:1}
 .rck.on{background:#e8890c;border-color:#e8890c;color:#fff}
-.cpy{flex:none;border:none;background:#e3f2f7;color:#0a7ea4;width:40px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cpy{flex:none;border:none;background:#e3f2f7;color:#0a7ea4;width:40px;height:30px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .cpy:active{background:#dde0e4}
 
 /* ── 전송 버튼 ── */
@@ -448,7 +448,7 @@ function copyAllStations(){
   function addRow(p,label){
     total++; if(!(p.h!==""||p.y!==""||p.x!=="")) return;
     done++; const h=num(p.h),y=num(p.y),x=num(p.x); H+=h;Y+=y;
-    body+="["+label+"] 🔵"+fmt(h)+" · 🔴"+fmt(y)+(x>0?" (무"+fmt(x)+")":"")+"\n";
+    body+="["+label+"]\n🔵"+fmt(h)+"   🔴"+fmt(y)+(x>0?"   (무"+fmt(x)+")":"")+"\n\n";
   }
   DONGS.forEach(function(d){state.ed[d].forEach(function(p){addRow(p,d+" "+p.n+"표소");});});
   SPGROUPS.forEach(function(g){state.sp[g.key].forEach(function(p){addRow(p,p.n);});});
